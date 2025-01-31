@@ -1,3 +1,4 @@
+
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -70,8 +71,7 @@ int main()
     auto start = chrono::high_resolution_clock::now();
     vector<int> result;
     for (int i = 0; i < iterations; i++)
-    {
-        random_shuffle(arr.begin(), arr.end()); 
+    { 
         result = minMax(arr);
     }
     auto stop = chrono::high_resolution_clock::now();
