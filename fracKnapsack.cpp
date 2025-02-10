@@ -1,84 +1,90 @@
-// Theory:  
-
-// The Fractional Knapsack Problem helps us pack a bag to get the maximum value while staying within a weight limit. Unlike 0/1 Knapsack, where we take whole items, here we can take fractions of items.  
-
-// How It Works: 
-// 1. Sort items by value per weight (more valuable items first).  
-// 2. Pick items one by one:
-//    - If the item fits, take it completely.  
-//    - If not, take a fraction to fill the remaining space.  
-// 3. Repeat until the bag is full.
-
-// Efficiency: 
-// Sorting takes O(n log n) time, and picking items takes O(n), making the total O(n log n). This greedy approach gives the best solution. 
-
-
-
 #include <bits/stdc++.h>
 using namespace std;
-using namespace std::chrono;
+using namespace chrono; // For measuring execution time
 
 struct Item {
-    int weight;
-    int value;
+    int value, weight;
 };
 
-bool compare(Item a, Item b) {
-    double r1 = (double)a.value / a.weight;
-    double r2 = (double)b.value / b.weight;
-    return r1 > r2;
+// Comparator for sorting by **maximum value first**
+bool cmpValue(Item a, Item b) {
+    return a.value > b.value;
 }
 
-double fractionalKnapsack(int W, vector<Item> &items) {
-    sort(items.begin(), items.end(), compare);
+// Comparator for sorting by **minimum weight first**
+bool cmpWeight(Item a, Item b) {
+    return a.weight < b.weight;
+}
 
-    double totalValue = 0.0;
-    int currentWeight = 0;
+// Comparator for sorting by **maximum value density first** (value/weight ratio)
+bool cmpDensity(Item a, Item b) {
+    return (double)a.value / a.weight > (double)b.value / b.weight;
+}
+
+// Function to calculate the maximum value that can be obtained using fractional knapsack
+double fractionalKnapsack(int W, vector<Item>& items, bool (*cmp)(Item, Item)) {
+    // Sort items based on the given comparator function
+    sort(items.begin(), items.end(), cmp);
+
+    double maxValue = 0.0;  // Maximum value obtained
+    int currentWeight = 0;  // Track the weight in the knapsack
 
     for (auto item : items) {
         if (currentWeight + item.weight <= W) {
-            totalValue += item.value; 
+            // Take the whole item
             currentWeight += item.weight;
+            maxValue += item.value;
         } else {
-            double fraction = (double)(W - currentWeight) / item.weight;
-            totalValue += item.value * fraction;
-            break; 
+            // Take only the fraction that fits
+            int remainingWeight = W - currentWeight;
+            maxValue += (item.value / (double)item.weight) * remainingWeight;
+            break;
         }
     }
-    return totalValue;
+    return maxValue;
 }
 
 int main() {
-    srand(time(0)); 
-    
-    while (true) {
-        int n;
-        cout << "Enter the number of items (or 0 to exit): ";
-        cin >> n;
+    int n, W;
+    cout << "Enter number of items: ";
+    cin >> n;
+    cout << "Enter max knapsack capacity: ";
+    cin >> W;
 
-        if (n == 0) break;
+    vector<Item> items(n);
+    srand(time(0)); // Seed for random generation
 
-        vector<Item> items(n);
-        int W;
-        cout << "Enter knapsack capacity: ";
-        cin >> W;
-
-        cout << "\nGenerated Items (Weight, Value):\n";
-        for (int i = 0; i < n; i++) {
-            items[i].weight = rand() % 20 + 1; 
-            items[i].value = rand() % 100 + 1; 
-            cout << "(" << items[i].weight << ", " << items[i].value << ") ";
-        }
-        cout << "\n";
-
-        auto start = high_resolution_clock::now();
-        double maxValue = fractionalKnapsack(W, items);
-        auto stop = high_resolution_clock::now();
-
-        auto duration = duration_cast<microseconds>(stop - start);
-        cout << "Max Value: " << maxValue << "\n";
-        cout << "Execution Time: " << duration.count() << " microseconds\n\n";
+    // Randomly generate values and weights
+    cout << "\nGenerated Items (Value, Weight): ";
+    for (int i = 0; i < n; i++) {
+        items[i].value = rand() % 100 + 1;  // Values between 1 to 100
+        items[i].weight = rand() % 50 + 1;  // Weights between 1 to 50
+        cout << "(" << items[i].value << ", " << items[i].weight << ") ";
     }
+    cout << endl;
+
+    // Measure execution time for Max Value First
+    auto start1 = high_resolution_clock::now();
+    double maxValue1 = fractionalKnapsack(W, items, cmpValue);
+    auto stop1 = high_resolution_clock::now();
+    auto duration1 = duration_cast<microseconds>(stop1 - start1);
+
+    // Measure execution time for Min Weight First
+    auto start2 = high_resolution_clock::now();
+    double maxValue2 = fractionalKnapsack(W, items, cmpWeight);
+    auto stop2 = high_resolution_clock::now();
+    auto duration2 = duration_cast<microseconds>(stop2 - start2);
+
+    // Measure execution time for Max Value Density First
+    auto start3 = high_resolution_clock::now();
+    double maxValue3 = fractionalKnapsack(W, items, cmpDensity);
+    auto stop3 = high_resolution_clock::now();
+    auto duration3 = duration_cast<microseconds>(stop3 - start3);
+
+    cout << "\nResults:\n";
+    cout << "Max Value First: " << maxValue1 << " (Time: " << duration1.count() << " µs)\n";
+    cout << "Min Weight First: " << maxValue2 << " (Time: " << duration2.count() << " µs)\n";
+    cout << "Max Value Density First: " << maxValue3 << " (Time: " << duration3.count() << " µs)\n";
 
     return 0;
 }
