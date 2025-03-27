@@ -1,0 +1,12 @@
+   graph[0].push_back({1, 2});
+    graph[0].push_back({2, 4});
+    graph[1].push_back({0, 2});
+    graph[1].push_back({2, 1});
+    graph[1].push_back({3, 7});
+    graph[2].push_back({0, 4});
+    graph[2].push_back({1, 1});
+    graph[2].push_back({4, 3});
+    graph[3].push_back({1, 7});
+    graph[3].push_back({4, 1});
+    graph[4].push_back({2, 3});
+    graph[4].push_back({3, 1});
